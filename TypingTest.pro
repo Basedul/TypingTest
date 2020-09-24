@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
+QT += printsupport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -25,10 +26,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    Dialog_for_user_input/dialog.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    Dialog_for_user_input/dialog.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    Dialog_for_user_input/dialog.ui

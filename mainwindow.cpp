@@ -8,15 +8,20 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    user_input_dialog = new Dialog();
+    connect(user_input_dialog, SIGNAL(banglaResultSendToMain(QStringList, QStringList, int, QString)), this, SLOT(banglaResultInToMain(QStringList, QStringList, int, QString)));
 }
 
 MainWindow::~MainWindow()
 {
+    delete user_input_dialog;
     delete ui;
 }
 
 unsigned MainWindow::wordCount(QString sentence)
 {
+
+
     QByteArray ba = sentence.toLocal8Bit();
     char *str = ba.data();
 
@@ -46,6 +51,16 @@ unsigned MainWindow::wordCount(QString sentence)
     return wc;
 }
 
+QStringList MainWindow::findWord(QString sentence)
+{
+    QStringList list = sentence.split(QRegExp("[\r\n\t ]+"), QString::SkipEmptyParts);
+
+    //    for(int i = 0; i < list.size(); i++){
+    //        qDebug() << "Find word " << list[i];
+    //    }
+    return list;
+}
+
 void MainWindow::on_pushButton_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(
@@ -64,7 +79,12 @@ void MainWindow::on_pushButton_clicked()
     while (!in.atEnd())
     {
         QString line = in.readLine();
-        pre.append(line);
+
+        //        pre.append(line);
+        QStringList lis = findWord(line);
+        for(int i = 0; i < lis.size(); i++){
+            pre.append(lis[i]);
+        }
         //        qDebug() << "Line = " << line.size();
     }
     file.close();
@@ -88,26 +108,149 @@ void MainWindow::on_pushButton_2_clicked()
     while (!in.atEnd())
     {
         QString line = in.readLine();
-        post.append(line);
+        //        post.append(line);
         //        qDebug() << "Line = " << line.size();
+        QStringList lis = findWord(line);
+        for(int i = 0; i < lis.size(); i++){
+            post.append(lis[i]);
+        }
     }
     file.close();
 }
 
 void MainWindow::on_pushButton_3_clicked()
 {
-    if(pre.size() != 0 && post.size() != 0){
-        for (int i = 0; i < pre.size(); i++){
+    qDebug() << "Total words " << pre.size();
 
-            if(QString::compare(pre[i], post[i], Qt::CaseInsensitive) == 0){
-                unsigned pr = wordCount(pre[i]);
-                unsigned po = wordCount(post[i]);
+    int wrong_word_counter = 0;
 
-                qDebug() << pre[i] << " pre " << pr << " po " << po;
-            }
+    //    if(pre.size() == post.size()){
 
+    //    }else if(pre.size() >)
+
+    for(int i = 0; i < pre.size(); i++){
+        if(QString::compare(pre[i], post[i], Qt::CaseInsensitive) != 0){
+            //            qDebug() << "Wrong words " << post[i];
+            ++wrong_word_counter;
         }
     }
-    pre.clear();post.clear();
 
+    //    if(pre.size() != 0 && post.size() != 0){
+    //        //        align=justify
+    //        QString html =
+    //                "<div align=left>"
+    //                "Sender Name<br>"
+    //                "street 34/56A<br>"
+    //                "121-43 city"
+    //                "</div>"
+    //                "<h1 align=center>DOCUMENT TITLE</h1>"
+    //                "<p >";
+    //        for (int i = 0; i < pre.size(); i++){
+
+    //            if(QString::compare(pre[i], post[i], Qt::CaseInsensitive) == 0){
+    //                unsigned pr = wordCount(pre[i]);
+    //                unsigned po = wordCount(post[i]);
+
+    //                //                qDebug() << pre[i] << " pre " << pr << " po " << po;
+    //                qDebug() << post[i];
+    //                html.append(post[i]);
+
+    //            }
+
+    //        }
+    //        html.append("</p>");
+    //        html.append("<div align=right>sincerly</div>");
+
+    //        QTextDocument document;
+    //        //                document.setPlainText(html);
+    //        document.setHtml(html);
+
+    //        QPrinter printer(QPrinter::PrinterResolution);
+    //        printer.setOutputFormat(QPrinter::PdfFormat);
+    //        printer.setPaperSize(QPrinter::A4);
+    //        printer.setOutputFileName("./test.pdf");
+    //        printer.setPageMargins(QMarginsF(15, 15, 15, 15));
+
+    //        document.print(&printer);
+    //    }
+    //    pre.clear();post.clear();
+
+}
+
+void MainWindow::on_pushButton_print_clicked()
+{
+
+}
+
+void MainWindow::on_pushButton_bangla_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(
+                this,
+                tr("Enter question file"),
+                "C//",
+                "Text File (*.txt)"
+                );
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadWrite))
+    {
+        QMessageBox::information(0,"info",file.errorString());
+        return;
+    }
+    QTextStream in(&file);
+    QStringList pre1, input;
+    while (!in.atEnd())
+    {
+        QString line = in.readLine();
+        input.append(line);
+        //        pre.append(line);
+        QStringList lis = findWord(line);
+        for(int i = 0; i < lis.size(); i++){
+            pre1.append(lis[i]);
+        }
+        //        qDebug() << "Line = " << line.size();
+    }
+    file.close();
+    user_input_dialog->setLabelData("বাংলার জন্য ইনপুট ফাইল সিলেক্ট করুন", pre1, input, "Bangla");
+    user_input_dialog->exec();
+}
+
+void MainWindow::banglaResultInToMain(QStringList input, QStringList output, int ww, QString type)
+{
+    QString html =
+            "<div align=left>"
+            "Sender Name<br>"
+            "street 34/56A<br>"
+            "121-43 city"
+            "</div>"
+            "<h1 align=center>DOCUMENT TITLE</h1>";
+    html.append("<div align=left>");
+    html.append("<p >");
+    for(int i = 0; i < input.size(); i++){
+        html.append(input[i]);
+    }
+    html.append("</p>");
+    html.append("</div>");
+    html.append("<div align=left>");
+    html.append("<p >");
+    for(int i = 0; i < output.size(); i++){
+        html.append(output[i]);
+    }
+    html.append("</p>");
+    html.append("</div>");
+    html.append("<div align=right>sincerly</div>");
+
+    QTextDocument document;
+    //                document.setPlainText(html);
+    document.setHtml(html);
+
+    QPrinter printer(QPrinter::PrinterResolution);
+    printer.setOutputFormat(QPrinter::PdfFormat);
+    printer.setPaperSize(QPrinter::A4);
+    printer.setOutputFileName("./test.pdf");
+    printer.setPageMargins(QMarginsF(15, 15, 15, 15));
+
+    document.print(&printer);
+
+    pre.clear();
+    post.clear();
 }
