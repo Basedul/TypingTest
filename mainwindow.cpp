@@ -216,28 +216,56 @@ void MainWindow::on_pushButton_bangla_clicked()
 
 void MainWindow::banglaResultInToMain(QStringList input, QStringList output, int ww, QString type)
 {
+    qDebug() << "iput .size = " << input.size();
     QString html =
             "<div align=left>"
-            "Sender Name<br>"
-            "street 34/56A<br>"
-            "121-43 city"
+            "Name: "+ui->lineEdit_name->text()+"<br>"
+            "ID: "+ui->lineEdit_id->text()+"<br>"
+            "BIAM Foundation"
             "</div>"
-            "<h1 align=center>DOCUMENT TITLE</h1>";
+            "<h1 align=center>Typing Test for "+type+"</h1>";
     html.append("<div align=left>");
     html.append("<p >");
+    html.append("<h1 align=left>Input text:</h1>");
     for(int i = 0; i < input.size(); i++){
-        html.append(input[i]);
+//        qDebug() << input[i];
+        html.append(input[i]+" ");
     }
     html.append("</p>");
     html.append("</div>");
     html.append("<div align=left>");
     html.append("<p >");
+    html.append("<h1 align=left>Output text:</h1>");
     for(int i = 0; i < output.size(); i++){
-        html.append(output[i]);
+        html.append(output[i]+" ");
     }
     html.append("</p>");
     html.append("</div>");
-    html.append("<div align=right>sincerly</div>");
+//    html.append("<div align=right>sincerly</div>");
+
+    html.append("<div align=left>");
+    html.append("<p >");
+    html.append("<h1 align=left>Result:</h1>");
+
+//    html.append("Number of valid words: "+QString::number((output.size()-ww))+" and invalid words: "+QString::number(ww));
+    if(input.size() == output.size()){
+        int res = input.size() - output.size();
+        int res1 = input.size() - res;
+        html.append("Total Words: "+QString::number(input.size())+", Number of valid words: "+QString::number((res1-ww))+" and invalid words: "+QString::number(ww));
+    }
+    else if(input.size() >= output.size()){
+        int res = input.size() - output.size();
+        int res1 = input.size() - res;
+        html.append("Total Words: "+QString::number(input.size())+", Number of valid words: "+QString::number((res1-ww))+" and invalid words: "+QString::number(ww));
+    }else if(input.size() <= output.size()){
+        int res = output.size() - input.size();
+        int res1 = output.size() - res;
+        html.append("Total Words: "+QString::number(input.size())+", Number of valid words: "+QString::number((res1-ww))+" and invalid words: "+QString::number(ww));
+    }
+
+    html.append("</p>");
+    html.append("</div>");
+    html.append("<div align=right>Signature</div>");
 
     QTextDocument document;
     //                document.setPlainText(html);
@@ -246,11 +274,48 @@ void MainWindow::banglaResultInToMain(QStringList input, QStringList output, int
     QPrinter printer(QPrinter::PrinterResolution);
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setPaperSize(QPrinter::A4);
-    printer.setOutputFileName("./test.pdf");
+//    printer.setOutputFileName("./test.pdf");
+    QDir dir("./"+ui->lineEdit_id->text());
+    if (!dir.exists())
+        dir.mkpath(".");
+//        dir.mkpath("./"+ui->lineEdit_id->text());
+    printer.setOutputFileName("./"+ui->lineEdit_id->text()+"/"+type+".pdf");
     printer.setPageMargins(QMarginsF(15, 15, 15, 15));
 
     document.print(&printer);
 
     pre.clear();
     post.clear();
+}
+
+void MainWindow::on_pushButton_english_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(
+                this,
+                tr("Enter question file"),
+                "C//",
+                "Text File (*.txt)"
+                );
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadWrite))
+    {
+        QMessageBox::information(0,"info",file.errorString());
+        return;
+    }
+    QTextStream in(&file);
+    QStringList pre1, input;
+    while (!in.atEnd())
+    {
+        QString line = in.readLine();
+        input.append(line);
+        //        pre.append(line);
+        QStringList lis = findWord(line);
+        for(int i = 0; i < lis.size(); i++){
+            pre1.append(lis[i]);
+        }
+        //        qDebug() << "Line = " << line.size();
+    }
+    file.close();
+    user_input_dialog->setLabelData("ইংলিশের জন্য ইনপুট ফাইল সিলেক্ট করুন", pre1, input, "English");
+    user_input_dialog->exec();
 }

@@ -19,6 +19,7 @@ void Dialog::setLabelData(QString str, QStringList pre, QStringList input, QStri
     this->pre = pre;
     this->input = input;
     this->type = type;
+
 }
 
 void Dialog::on_pushButton_cance_clicked()
@@ -38,29 +39,50 @@ QStringList Dialog::findWord(QString sentence)
 
 void Dialog::on_pushButton_done_clicked()
 {
-    qDebug() << "Total words " << pre.size();
+//    qDebug() << "Word algorightm = " << pre.size() << " " << post.size() ;
 
     int wrong_word_counter = 0;
 
-//    if(pre.size() == post.size()){
-
-//    }else if(pre.size() >)
-
-    for(int i = 0; i < pre.size(); i++){
-        if(QString::compare(pre[i], post[i], Qt::CaseInsensitive) != 0){
-//            qDebug() << "Wrong words " << post[i];
-            ++wrong_word_counter;
+    if(pre.size() == post.size()){
+        for(int i = 0; i < pre.size(); i++){
+            if(QString::compare(pre[i], post[i], Qt::CaseInsensitive) != 0){
+    //            qDebug() << "Wrong words " << post[i];
+                post[i] = "<u>"+post[i]+"</u>";
+                ++wrong_word_counter;
+            }
+        }
+    }else if(pre.size() <= post.size()){
+        for(int i = 0; i < pre.size(); i++){
+            if(QString::compare(pre[i], post[i], Qt::CaseInsensitive) != 0){
+    //            qDebug() << "Wrong words " << post[i];
+                post[i] = "<u>"+post[i]+"</u>";
+                ++wrong_word_counter;
+            }
+        }
+    }else if(pre.size() >= post.size()){
+        for(int i = 0; i < post.size(); i++){
+            if(QString::compare(pre[i], post[i], Qt::CaseInsensitive) != 0){
+    //            qDebug() << "Wrong words " << post[i];
+                post[i] = "<u>"+post[i]+"</u>";
+                ++wrong_word_counter;
+            }
         }
     }
-    emit banglaResultSendToMain(input, output, wrong_word_counter, this->type);
+
+
+//    emit banglaResultSendToMain(input, output, wrong_word_counter, this->type);
+    emit banglaResultSendToMain(pre, post, wrong_word_counter, this->type);
     input.clear();
     output.clear();
     type = "";
+    pre.clear();
+    post.clear();
     this->close();
 }
 
 void Dialog::on_pushButton_word_input_clicked()
 {
+    post.clear();
     QString filename = QFileDialog::getOpenFileName(
                 this,
                 tr("Enter a text file"),
@@ -76,7 +98,8 @@ void Dialog::on_pushButton_word_input_clicked()
     QTextStream in(&file);
     while (!in.atEnd())
     {
-        QString line = in.readLine();QStringList lis = findWord(line);
+        QString line = in.readLine();
+        QStringList lis = findWord(line);
         output.append(line);
         for(int i = 0; i < lis.size(); i++){
             post.append(lis[i]);

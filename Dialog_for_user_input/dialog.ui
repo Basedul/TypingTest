@@ -42,7 +42,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Done!</string>
+    <string>Print</string>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton_word_input">

@@ -35,6 +35,8 @@ private slots:
     void on_pushButton_print_clicked();
 
     void on_pushButton_bangla_clicked();
+    void on_pushButton_english_clicked();
+
 public slots:
     void banglaResultInToMain(QStringList, QStringList, int, QString);
 
